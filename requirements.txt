@@ -24,4 +24,4 @@ telegraph==2.2.0
 apscheduler
 Flask
 uvloop
-git+https://github.com/badmunda98/BadAPI
+git+https://gitlab.com/badmunda98/BadAPI
