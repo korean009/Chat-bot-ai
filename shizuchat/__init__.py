@@ -1,5 +1,5 @@
 # ============================
-# EVENT LOOP FIX
+# EVENT LOOP FIX (BEFORE UVLOOP)
 # ============================
 import asyncio
 
@@ -9,6 +9,7 @@ except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
+# Install uvloop AFTER loop creation
 import uvloop
 uvloop.install()
 
@@ -39,18 +40,15 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 LOGGER = logging.getLogger(__name__)
 
-boot = time.time()
-
 # ============================
 # DATABASE
 # ============================
 mongodb = MongoCli(config.MONGO_URL)
 db = mongodb.Anonymous
 mongo = MongoClient(config.MONGO_URL)
-OWNER = config.OWNER_ID
 
 # ============================
-# TIMEZONE + SCHEDULER
+# SCHEDULER
 # ============================
 TIME_ZONE = pytz.timezone(config.TIME_ZONE)
 scheduler = AsyncIOScheduler(timezone=TIME_ZONE)
@@ -64,20 +62,22 @@ class shizuchat(Client):
             name="shizuchat",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            lang_code="en",
             bot_token=config.BOT_TOKEN,
-            in_memory=True,
+            lang_code="en",
             parse_mode=ParseMode.DEFAULT,
+            in_memory=True,
         )
 
     async def start(self):
         await super().start()
+
         self.id = self.me.id
-        self.name = self.me.first_name + " " + (self.me.last_name or "")
+        self.name = f"{self.me.first_name} {self.me.last_name or ''}"
         self.username = self.me.username
         self.mention = self.me.mention
 
     async def stop(self):
         await super().stop()
+
 
 shizuchat = shizuchat()
