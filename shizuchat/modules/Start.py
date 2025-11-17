@@ -199,16 +199,6 @@ async def help(client: shizuchat, m: Message):
         await add_served_chat(m.chat.id)
 
 
-@shizuchat.on_cmd("repo")
-async def repo(_, m: Message):
-    await m.reply_text(
-        text=SOURCE_READ,
-        reply_markup=InlineKeyboardMarkup(CLOSE_BTN),
-        disable_web_page_preview=True,
-    )
-
-
-
 
 @shizuchat.on_cmd("ping")
 async def ping(_, message: Message):
