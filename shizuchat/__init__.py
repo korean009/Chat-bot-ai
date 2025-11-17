@@ -1,31 +1,16 @@
 # ============================
-# EVENT LOOP + UVLOOP FIX
+# EVENT LOOP FIX
 # ============================
 import asyncio
-import uvloop
 
-# Ensure an event loop exists BEFORE installing uvloop
 try:
     asyncio.get_event_loop()
 except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-# Install uvloop
+import uvloop
 uvloop.install()
-
-# Monkeypatch uvloop get_event_loop to always return a loop
-_original_get_event_loop = uvloop.loop.LoopPolicy.get_event_loop
-
-def safe_get_event_loop(self):
-    try:
-        return _original_get_event_loop(self)
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop
-
-uvloop.loop.LoopPolicy.get_event_loop = safe_get_event_loop
 
 # ============================
 # NORMAL IMPORTS
@@ -42,7 +27,7 @@ from pyrogram.enums import ParseMode
 import config
 
 # ============================
-# LOGGING CONFIG
+# LOGGING
 # ============================
 logging.basicConfig(
     format="[%(asctime)s - %(levelname)s] - %(name)s - %(message)s",
@@ -65,7 +50,7 @@ mongo = MongoClient(config.MONGO_URL)
 OWNER = config.OWNER_ID
 
 # ============================
-# TIMEZONE & SCHEDULER
+# TIMEZONE + SCHEDULER
 # ============================
 TIME_ZONE = pytz.timezone(config.TIME_ZONE)
 scheduler = AsyncIOScheduler(timezone=TIME_ZONE)
@@ -95,5 +80,4 @@ class shizuchat(Client):
     async def stop(self):
         await super().stop()
 
-# Instantiate the bot AFTER loop fix
 shizuchat = shizuchat()
