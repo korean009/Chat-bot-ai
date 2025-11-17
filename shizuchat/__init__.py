@@ -1,26 +1,27 @@
+# shizuchat/__init__.py
 # ============================
-# EVENT LOOP FIX (BEFORE UVLOOP)
+# EVENT LOOP + UVLOOP SAFE START
 # ============================
 import asyncio
 
+# Ensure an event loop exists before any library (uvloop/pyrogram) asks for it
 try:
     asyncio.get_event_loop()
 except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-# Install uvloop AFTER loop creation
+# Install uvloop after ensuring event loop exists
 import uvloop
 uvloop.install()
 
 # ============================
-# NORMAL IMPORTS
+# NORMAL IMPORTS (Abg REMOVED)
 # ============================
 import logging
 import time
 import pytz
 from pymongo import MongoClient
-from Abg import patch
 from motor.motor_asyncio import AsyncIOMotorClient as MongoCli
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import Client
@@ -36,9 +37,10 @@ logging.basicConfig(
     handlers=[logging.FileHandler("log.txt"), logging.StreamHandler()],
     level=logging.INFO,
 )
-
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 LOGGER = logging.getLogger(__name__)
+
+boot = time.time()
 
 # ============================
 # DATABASE
@@ -46,6 +48,7 @@ LOGGER = logging.getLogger(__name__)
 mongodb = MongoCli(config.MONGO_URL)
 db = mongodb.Anonymous
 mongo = MongoClient(config.MONGO_URL)
+OWNER = config.OWNER_ID
 
 # ============================
 # SCHEDULER
@@ -70,14 +73,14 @@ class shizuchat(Client):
 
     async def start(self):
         await super().start()
-
+        # safe attributes
         self.id = self.me.id
-        self.name = f"{self.me.first_name} {self.me.last_name or ''}"
+        self.name = f"{self.me.first_name} {self.me.last_name or ''}".strip()
         self.username = self.me.username
         self.mention = self.me.mention
 
     async def stop(self):
         await super().stop()
 
-
+# Instantiate bot (safe because we created the event loop above)
 shizuchat = shizuchat()
