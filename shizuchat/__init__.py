@@ -8,9 +8,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import Client
 from pyrogram.enums import ParseMode
 import config
-import uvloop
+import asyncio
 
-uvloop.install()
+# Fix for Python 3.12+ (Heroku safe)
+asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 logging.basicConfig(
     format="[%(asctime)s - %(levelname)s] - %(name)s - %(message)s",
@@ -27,7 +28,6 @@ db = mongodb.Anonymous
 mongo = MongoClient(config.MONGO_URL)
 OWNER = config.OWNER_ID
 
-#time zone
 TIME_ZONE = pytz.timezone(config.TIME_ZONE)
 scheduler = AsyncIOScheduler(timezone=TIME_ZONE)
 
@@ -53,6 +53,4 @@ class shizuchat(Client):
     async def stop(self):
         await super().stop()
 
-
 shizuchat = shizuchat()
-    
